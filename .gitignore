@@ -1,0 +1,39 @@
+# Files / Folders
+.cache
+.cache/
+.CVS
+.env
+.idea
+.project
+.project/
+.settings
+.svn
+.tmproj
+.well-known/
+*.ini
+*.log
+*.phpunit*
+*.diff
+*.err
+*.orig
+*.rej
+*.swo
+*.swp
+*.vi
+*.sass-cache
+*.psd
+*.sublime-project
+*.sublime-workspace
+
+# OS / Network
+[Tt]humbs.db*
+[Dd]esktop.ini
+$RECYCLE.BIN/
+@Recycle/
+@Recently-Snapshot/
+.DS_Store
+._*
+.Trashes
+
+# PHP
+private/cache
