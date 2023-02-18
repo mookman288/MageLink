@@ -108,6 +108,63 @@
 					$errors[] = "You're trying to shorten too many links too quickly, please slow down.";
 				}
 
+				//If hCaptcha is enabled.
+				if (!empty($config['app']['hcaptchaSiteKey']) && !empty($config['app']['hcaptchaSecretKey'])) {
+					$hCaptchaResponse = filter_input(INPUT_POST, 'h-captcha-response', FILTER_SANITIZE_STRING);
+
+					//Initiate the cURL handler.
+					$ch = curl_init();
+
+					//Set the cURL options here.
+					curl_setopt($ch, CURLOPT_URL, "https://hcaptcha.com/siteverify");
+					curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); //Return the transfer as a string.
+					curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true); //Verify the peer (SSL.)
+					curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2); //Verify the host (SSL.)
+					curl_setopt($ch, CURLOPT_POST, true); //Indicate that this is a POST request.
+					curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
+						'secret' => $config['app']['hcaptchaSecretKey'],
+						'response' => $hCaptchaResponse
+					)));
+					curl_setopt($ch, CURLOPT_POSTREDIR, 3); //How to handle a POST redirection.
+
+					//Execute the cURL POST.
+					$curlResponse = curl_exec($ch);
+
+					//Get the HTTP code.
+					$code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+					//If the handler is a resource.
+					if (gettype($ch) == 'resource') {
+						$errorNumber = curl_errno($ch);
+
+						//If there is a cURL error number.
+						if (!empty($errorNumber)) {
+							$errors[] = "We could not verify your CAPTCHA response. Please try again later.";
+						}
+					}
+
+					//Close cURL.
+					curl_close($ch);
+
+					//If there is a cURL response.
+					if (empty($errors) && !empty($curlResponse)) {
+						switch($code) {
+							case 200:
+							case 206:
+								$responseData = json_decode($curlResponse);
+
+								//If the captcha challenge was a failure.
+								if (empty($responseData -> success)) {
+									$errors[] = "Your CAPTCHA response was incorrect. Please try again.";
+								}
+							break;
+							default:
+								$errors[] = "We could not verify your CAPTCHA response. Please try again.";
+							break;
+						}
+					}
+				}
+
 				//If there are no errors.
 				if (empty($errors)) {
 					//Assume that the code exists to start the loop below.
@@ -281,6 +338,12 @@
 	<?php } ?>
 <?php } ?>
 				<form action="<?php print($config['app']['url']); ?>" method="POST">
+<?php if (!empty($config['app']['hcaptchaSiteKey']) && !empty($config['app']['hcaptchaSecretKey'])) { ?>
+					<div
+						class="h-captcha has-text-centered"
+						data-sitekey="<?php print($config['app']['hcaptchaSiteKey']); ?>"
+					></div>
+<?php } ?>
 					<div class="field is-grouped is-grouped-centered">
 						<div class="control field has-addons is-expanded">
 							<div class="control">
@@ -297,6 +360,7 @@
 							</div>
 						</div>
 					</div>
+
 				</form>
 			</section>
 		</main>
@@ -306,5 +370,8 @@
 				Powered by <a href="https://github.com/mookman288/magelink" target="_blank" rel="noopener">MageLink</a>
 			</section>
 		</footer>
+<?php if (!empty($config['app']['hcaptchaSiteKey']) && !empty($config['app']['hcaptchaSecretKey'])) { ?>
+		<script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+<?php } ?>
 	</body>
 </html>
