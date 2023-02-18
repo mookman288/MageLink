@@ -37,3 +37,4 @@ $RECYCLE.BIN/
 
 # PHP
 private/cache
+config.php
