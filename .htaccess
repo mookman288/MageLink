@@ -1,0 +1,27 @@
+<IfModule mod_rewrite.c>
+	<IfModule mod_negotiation.c>
+		Options -MultiViews -Indexes
+	</IfModule>
+
+	RewriteEngine On
+
+	#If https is off, rewrite it to enable https. Disable this to disable forced https.
+	RewriteCond %{HTTPS} off
+	RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+	#Rewrite the www subdomain. Disable this to force non-www.
+	RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
+	RewriteRule ^(.*)$ https://%1/$1 [L,R=301]
+
+	#Deny access to sql files.
+	RewriteRule ^(.*)\.sql(.*)$ - [F,L]
+
+	#Non-existent directories.
+	RewriteCond %{REQUEST_FILENAME} !-d
+
+	#Non-existent files.
+	RewriteCond %{REQUEST_FILENAME} !-f
+
+	#Rewrite everything that matches the above conditions to the index with the query value appended.
+	RewriteRule ^(.+)$ index.php?code=$1 [QSA,L]
+</IfModule>
