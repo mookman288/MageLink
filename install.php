@@ -31,6 +31,10 @@
 			$errors[] = 'You must provide a base site URL.';
 		}
 
+		//Get the optional hcaptcha integration.
+		$hcaptchaSiteKey = filter_input(INPUT_POST, 'hcaptchaSiteKey', FILTER_SANITIZE_STRING);
+		$hcaptchaSecretKey = filter_input(INPUT_POST, 'hcaptchaSecretKey', FILTER_SANITIZE_STRING);
+
 		$hostname = filter_input(INPUT_POST, 'hostname', FILTER_SANITIZE_URL);
 
 		if (empty($hostname)) {
@@ -77,6 +81,8 @@
 		'app' => array(
 			'name' => "$siteName",
 			'url' => "$siteUrl",
+			'hcaptchaSiteKey' => "$hcaptchaSiteKey",
+			'hcaptchaSecretKey' => "$hcaptchaSecretKey",
 			'lastUpdated' => 15
 		),
 		'db' => array(
@@ -160,6 +166,20 @@ EOT;
 						<div class="control">
 							<input id="siteUrl" class="input" type="text" name="siteUrl"
 								value="<?php print($siteUrl ?? $defaultsiteUrl); ?>" />
+						</div>
+					</div>
+					<div class="field">
+						<label class="label" for="hcaptchaSiteKey">hCaptcha Site Key (optional)</label>
+						<div class="control">
+							<input id="hcaptchaSiteKey" class="input" type="text" name="hcaptchaSiteKey"
+								value="<?php print($hcaptchaSiteKey ?? null); ?>" />
+						</div>
+					</div>
+					<div class="field">
+						<label class="label" for="hcaptchaSecretKey">hCaptcha Secret Key (optional)</label>
+						<div class="control">
+							<input id="hcaptchaSecretKey" class="input" type="text" name="hcaptchaSecretKey"
+								value="<?php print($hcaptchaSecretKey ?? null); ?>" />
 						</div>
 					</div>
 					<h2 class="subtitle">Database Settings</h2>
